@@ -139,4 +139,4 @@ def export_onnx(ckpt_name, ensemble, scale_factor):
         print("=> sim ONNX Model check done!")
 
 
-export_onnx(ckpt_name="rife49.pth", ensemble=True, scale_factor=1)
+export_onnx(ckpt_name="rife47.pth", ensemble=True, scale_factor=1)

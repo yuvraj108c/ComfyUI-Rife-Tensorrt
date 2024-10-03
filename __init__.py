@@ -75,7 +75,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "RifeTensorrt": "Rife Tensorrt",
+    "RifeTensorrt": "⚡ Rife Tensorrt",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
