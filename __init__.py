@@ -16,7 +16,7 @@ class RifeTensorrt:
             "required": {
                 "frames": ("IMAGE", ),
                 "engine": (os.listdir(ENGINE_DIR),),
-                "clear_cache_after_n_frames": ("INT", {"default": 10, "min": 1, "max": 1000}),
+                "clear_cache_after_n_frames": ("INT", {"default": 50, "min": 1, "max": 1000}),
                 "multiplier": ("INT", {"default": 2, "min": 1}),
             },
         }
@@ -25,14 +25,11 @@ class RifeTensorrt:
     FUNCTION = "vfi"
     CATEGORY = "tensorrt"
 
-    def float_to_tensor(self, value, height, width):
-        return torch.full((1, 1, height, width), value)
-
     def vfi(
         self,
         frames,
         engine,
-        clear_cache_after_n_frames=10,
+        clear_cache_after_n_frames=50,
         multiplier=2
     ):
         B, H, W, C = frames.shape
@@ -59,7 +56,6 @@ class RifeTensorrt:
         frames = preprocess_frames(frames)
 
         def return_middle_frame(frame_0, frame_1, timestep):
-
             timestep_t = torch.tensor([timestep], dtype=torch.float32).to(get_torch_device())
             # s = time.time()
             output = self.engine.infer({"img0": frame_0, "img1": frame_1, "timestep": timestep_t}, cudaStream)
