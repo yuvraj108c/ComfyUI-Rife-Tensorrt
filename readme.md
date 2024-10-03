@@ -41,7 +41,7 @@ pip install -r requirements.txt
    - [rife49_ensemble_True_scale_1_sim.onnx](https://huggingface.co/yuvraj108c/rife-onnx/resolve/main/rife49_ensemble_True_scale_1_sim.onnx)
    - [rife48_ensemble_True_scale_1_sim.onnx](https://huggingface.co/yuvraj108c/rife-onnx/resolve/main/rife48_ensemble_True_scale_1_sim.onnx)
    - [rife47_ensemble_True_scale_1_sim.onnx](https://huggingface.co/yuvraj108c/rife-onnx/resolve/main/rife47_ensemble_True_scale_1_sim.onnx)
-2. Edit paths inside [export_trt.py](./export_trt.py) and build tensorrt engine by running:
+2. Edit onnx/trt paths inside [export_trt.py](./export_trt.py) and build tensorrt engine by running:
    - `python export_trt.py`
 
 3. Place the exported engine inside ComfyUI `/models/tensorrt/rife` directory
@@ -49,6 +49,7 @@ pip install -r requirements.txt
 ## ☀️ Usage
 
 - Insert node by `Right Click -> tensorrt -> Rife Tensorrt`
+- Image resolutions between `256x256` and `3840x3840` will work with the tensorrt engines 
 
 ## 🤖 Environment tested
 
