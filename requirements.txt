@@ -1,0 +1,4 @@
+einops
+colored
+polygraphy
+tensorrt==10.4.0
