@@ -16,7 +16,7 @@ import tensorrt as trt
 from logging import error, warning
 from tqdm import tqdm
 import copy
-# from .vfi_utilities import logger
+from cuda import cudart
 
 TRT_LOGGER = trt.Logger(trt.Logger.ERROR)
 G_LOGGER.module_severity = G_LOGGER.ERROR
@@ -43,6 +43,17 @@ else:
 torch_to_numpy_dtype_dict = {
     value: key for (key, value) in numpy_to_torch_dtype_dict.items()
 }
+
+# https://github.com/Jeff-LiangF/streamv2v/blob/18c1a3bd56ff348d54a3300605936980bb13b03c/src/streamv2v/acceleration/tensorrt/utilities.py
+def CUASSERT(cuda_ret):
+    err = cuda_ret[0]
+    if err != cudart.cudaError_t.cudaSuccess:
+        raise RuntimeError(
+            f"CUDA ERROR: {err}, error code reference: https://nvidia.github.io/cuda-python/module/cudart.html#cuda.cudart.cudaError_t"
+        )
+    if len(cuda_ret) > 1:
+        return cuda_ret[1]
+    return None
 
 class TQDMProgressMonitor(trt.IProgressMonitor):
     def __init__(self):
@@ -113,7 +124,6 @@ class TQDMProgressMonitor(trt.IProgressMonitor):
         except KeyboardInterrupt:
             # There is no need to propagate this exception to TensorRT. We can simply cancel the build.
             return False
-
 
 class Engine:
     def __init__(
@@ -207,7 +217,6 @@ class Engine:
         return 0
 
     def load(self):
-        # logger(f"Loading TensorRT engine: {self.engine_path}")
         self.engine = engine_from_bytes(bytes_from_path(self.engine_path))
 
     def activate(self, reuse_device_memory=None):
@@ -237,22 +246,31 @@ class Engine:
         nvtx.range_pop()
 
     def infer(self, feed_dict, stream, use_cuda_graph=False):
-        nvtx.range_push("set_tensors")
         for name, buf in feed_dict.items():
             self.tensors[name].copy_(buf)
 
         for name, tensor in self.tensors.items():
             self.context.set_tensor_address(name, tensor.data_ptr())
-        nvtx.range_pop()
-        nvtx.range_push("execute")
-        noerror = self.context.execute_async_v3(stream)
-        if not noerror:
-            raise ValueError("ERROR: inference failed.")
-        nvtx.range_pop()
-        return self.tensors
 
-    def __str__(self):
-        for idx in range(self.engine.num_io_tensors):
-            name = self.engine.get_tensor_name(idx)
-            shape = self.context.get_tensor_shape(name)
-            print(name, shape)
+        if use_cuda_graph:
+            if self.cuda_graph_instance is not None:
+                CUASSERT(cudart.cudaGraphLaunch(self.cuda_graph_instance, stream.ptr))
+                CUASSERT(cudart.cudaStreamSynchronize(stream.ptr))
+            else:
+                # do inference before CUDA graph capture
+                noerror = self.context.execute_async_v3(stream.ptr)
+                if not noerror:
+                    raise ValueError("ERROR: inference failed.")
+                # capture cuda graph
+                CUASSERT(
+                    cudart.cudaStreamBeginCapture(stream.ptr, cudart.cudaStreamCaptureMode.cudaStreamCaptureModeGlobal)
+                )
+                self.context.execute_async_v3(stream.ptr)
+                self.graph = CUASSERT(cudart.cudaStreamEndCapture(stream.ptr))
+                self.cuda_graph_instance = CUASSERT(cudart.cudaGraphInstantiate(self.graph, 0))
+        else:
+            noerror = self.context.execute_async_v3(stream.ptr)
+            if not noerror:
+                raise ValueError("ERROR: inference failed.")
+
+        return self.tensors
