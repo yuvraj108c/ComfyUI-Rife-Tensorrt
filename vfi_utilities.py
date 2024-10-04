@@ -74,6 +74,7 @@ def generate_frames_rife(
 
     # Append final frame
     output_frames[out_len] = frames[-1:]
+    logger(f"done! - {(len(frames) -1) * (multiplier-1)} new frames generated at resolution: {output_frames[0].shape}")
     out_len += 1
 
     # clear cache for courtesy
