@@ -7,6 +7,9 @@
 [![trt](https://img.shields.io/badge/TRT-10.4.0-green)](https://developer.nvidia.com/tensorrt)
 [![by-nc-sa/4.0](https://img.shields.io/badge/license-CC--BY--NC--SA--4.0-lightgrey)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
 
+![node](https://github.com/user-attachments/assets/5fd6d529-300c-42a5-b9cf-46e031f0bcb5)
+
+
 </div>
 
 This project provides a [TensorRT](https://github.com/NVIDIA/TensorRT) implementation of [RIFE](https://github.com/hzwer/ECCV2022-RIFE) for ultra fast frame interpolation inside ComfyUI
@@ -19,7 +22,7 @@ If you like the project, please give me a star! ⭐
 
 ## ⏱️ Performance
 
-_Note: The following results were benchmarked on FP16 engines inside ComfyUI, using 1000 frames consisting of 2 alternating similar frames, averaged 2-3 times_
+_Note: The following results were benchmarked on FP16 engines inside ComfyUI, using 2000 frames consisting of 2 alternating similar frames, averaged 2-3 times_
 
 | Device | Rife Engine | Resolution| Multiplier | FPS |
 | :----: | :-: | :-: | :-: | :-: |
