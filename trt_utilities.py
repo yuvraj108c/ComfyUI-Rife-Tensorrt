@@ -270,7 +270,7 @@ class MultiStreamEngine(Engine):
         super().activate()
         for _ in range(self.num_streams):
             # stream = torch.cuda.Stream()
-            stream = cuda.stream()
+            stream = cuda.Stream()
             context = self.engine.create_execution_context()
             self.streams.append(stream)
             self.contexts.append(context)
@@ -323,30 +323,30 @@ class MultiStreamEngine(Engine):
                 
                 feed_dict = feed_dicts[i + j]
                 stream = self.streams[j]
-                context = self.contexts[j]
-                tensors = self.stream_tensors[j]
+                context = self.contexts[0]
+                tensors = self.stream_tensors[0]
 
                 for name, buf in feed_dict.items():
                     tensors[name].copy_(buf)
 
-                for name, tensor in tensors.items():
-                    context.set_tensor_address(name, tensor.data_ptr())
+                if (i == 0):
+                    for name, tensor in tensors.items():
+                        context.set_tensor_address(name, tensor.data_ptr())
                     
                 if use_cuda_graph:
                     if self.cuda_graph_instance is not None:
                         CUASSERT(cudart.cudaGraphLaunch(self.cuda_graph_instance, stream.ptr))
                         CUASSERT(cudart.cudaStreamSynchronize(stream.ptr))
-                        print("using graph")
                     else:
                         # do inference before CUDA graph capture
-                        noerror = self.context.execute_async_v3(stream.ptr)
+                        noerror = context.execute_async_v3(stream.ptr)
                         if not noerror:
                             raise ValueError("ERROR: inference failed.")
                         # capture cuda graph
                         CUASSERT(
                             cudart.cudaStreamBeginCapture(stream.ptr, cudart.cudaStreamCaptureMode.cudaStreamCaptureModeGlobal)
                         )
-                        self.context.execute_async_v3(stream.ptr)
+                        context.execute_async_v3(stream.ptr)
                         self.graph = CUASSERT(cudart.cudaStreamEndCapture(stream.ptr))
                         self.cuda_graph_instance = CUASSERT(cudart.cudaGraphInstantiate(self.graph, 0))
                 else:
@@ -358,7 +358,7 @@ class MultiStreamEngine(Engine):
                 # if not success:
                 #     raise RuntimeError(f"Inference failed for batch {i + j}")
 
-                batch_results.append({name: tensor.clone() for name, tensor in tensors.items() 
+                batch_results.append({name: tensor for name, tensor in tensors.items() 
                                         if self.engine.get_tensor_mode(name) == trt.TensorIOMode.OUTPUT})
 
             # Synchronize all used streams
