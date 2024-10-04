@@ -6,6 +6,7 @@ from .vfi_utilities import preprocess_frames, postprocess_frames, generate_frame
 from .trt_utilities import Engine, MultiStreamEngine
 import folder_paths
 import time
+from polygraphy import cuda
 
 ENGINE_DIR = os.path.join(folder_paths.models_dir, "tensorrt", "rife")
 
@@ -16,9 +17,9 @@ class RifeTensorrt:
             "required": {
                 "frames": ("IMAGE", ),
                 "engine": (os.listdir(ENGINE_DIR),),
-                "clear_cache_after_n_frames": ("INT", {"default": 50, "min": 1, "max": 1000}),
+                "clear_cache_after_n_frames": ("INT", {"default": 100, "min": 1, "max": 1000}),
                 "multiplier": ("INT", {"default": 2, "min": 1}),
-                "cuda_streams": ("INT", {"default": 1, "min": 1, "max": 24}),
+                "use_cuda_graph": ("BOOLEAN", {"default": True}),
                 "keep_model_loaded": ("BOOLEAN", {"default": False}),
             },
         }
@@ -26,16 +27,16 @@ class RifeTensorrt:
     RETURN_TYPES = ("IMAGE", )
     FUNCTION = "vfi"
     CATEGORY = "tensorrt"
-    OUTPUT_NODE = True
+    OUTPUT_NODE=True
 
     def vfi(
         self,
         frames,
         engine,
-        clear_cache_after_n_frames=50,
+        clear_cache_after_n_frames=100,
         multiplier=2,
-        cuda_streams=1,
-        keep_model_loaded=False
+        use_cuda_graph=True,
+        keep_model_loaded=False,
     ):
         B, H, W, C = frames.shape
         shape_dict = {
@@ -44,12 +45,10 @@ class RifeTensorrt:
             "output": {"shape": (1, 3, H, W)},
         }
 
-        # setup tensorrt engine
-        cudaStream = torch.cuda.current_stream().cuda_stream
+        cudaStream = cuda.Stream()
         engine_path = os.path.join(ENGINE_DIR, engine)
         if (not hasattr(self, 'engine') or self.engine_label != engine):
             self.engine = MultiStreamEngine(engine_path)
-            # self.engine = Engine(engine_path)
             logger(f"Loading TensorRT engine: {engine_path}")
             self.engine.load()
             self.engine_label = engine
@@ -65,9 +64,7 @@ class RifeTensorrt:
         frames = preprocess_frames(frames)
         logger("preprocessing done")
         def return_middle_frame(data_batch):
-            # timestep_t = torch.tensor([timestep], dtype=torch.float32).to(get_torch_device())
             # s = time.time()
-            # output = self.engine.infer({"img0": frame_0, "img1": frame_1, "timestep": timestep_t}, cudaStream)
             results = self.engine.infer(data_batch)
             # e = time.time()
             # print(f"Time taken to infer: {(e-s)*1000} ms")
