@@ -19,6 +19,7 @@ class RifeTensorrt:
                 "engine": (os.listdir(ENGINE_DIR),),
                 "clear_cache_after_n_frames": ("INT", {"default": 100, "min": 1, "max": 1000}),
                 "multiplier": ("INT", {"default": 2, "min": 1}),
+                "cuda_streams": ("INT", {"default": 1, "min": 24}),
                 "use_cuda_graph": ("BOOLEAN", {"default": True}),
                 "keep_model_loaded": ("BOOLEAN", {"default": False}),
             },
@@ -35,6 +36,7 @@ class RifeTensorrt:
         engine,
         clear_cache_after_n_frames=100,
         multiplier=2,
+        cuda_streams=1,
         use_cuda_graph=True,
         keep_model_loaded=False,
     ):
