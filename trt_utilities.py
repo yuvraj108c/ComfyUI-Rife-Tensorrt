@@ -16,7 +16,8 @@ import tensorrt as trt
 from logging import error, warning
 from tqdm import tqdm
 import copy
-# from .vfi_utilities import logger
+from collections import OrderedDict
+from typing import List, Dict
 
 TRT_LOGGER = trt.Logger(trt.Logger.ERROR)
 G_LOGGER.module_severity = G_LOGGER.ERROR
@@ -251,8 +252,93 @@ class Engine:
         nvtx.range_pop()
         return self.tensors
 
-    def __str__(self):
-        for idx in range(self.engine.num_io_tensors):
-            name = self.engine.get_tensor_name(idx)
-            shape = self.context.get_tensor_shape(name)
-            print(name, shape)
+class MultiStreamEngine(Engine):
+    def __init__(self, engine_path, num_streams=2):
+        super().__init__(engine_path)
+        self.num_streams = num_streams
+        self.streams = []
+        self.contexts = []
+        self.stream_tensors = []
+
+    def set_num_streams(self, value):
+        self.num_streams = value
+
+    def activate(self):
+        super().activate()
+        for _ in range(self.num_streams):
+            stream = torch.cuda.Stream()
+            context = self.engine.create_execution_context()
+            self.streams.append(stream)
+            self.contexts.append(context)
+            self.stream_tensors.append(OrderedDict())
+
+    def get_torch_dtype(self, trt_dtype):
+        """Convert TensorRT dtype to PyTorch dtype."""
+        dtype_map = {
+            trt.int8: torch.int8,
+            trt.int32: torch.int32,
+            trt.float16: torch.float16,
+            trt.float32: torch.float32,
+            trt.bool: torch.bool,
+        }
+        return dtype_map.get(trt_dtype, torch.float32)  # Default to float32 if not found
+
+    def allocate_buffers(self, shape_dict=None, device="cuda"):
+        nvtx.range_push("allocate_buffers")
+        for stream_idx in range(self.num_streams):
+            tensors = self.stream_tensors[stream_idx]
+            context = self.contexts[stream_idx]
+            
+            for idx in range(self.engine.num_io_tensors):
+                name = self.engine.get_tensor_name(idx)
+                binding = self.engine[idx]
+                if shape_dict and binding in shape_dict:
+                    shape = shape_dict[binding]["shape"]
+                else:
+                    shape = context.get_tensor_shape(name)
+
+                dtype = trt.nptype(self.engine.get_tensor_dtype(name))
+                if self.engine.get_tensor_mode(name) == trt.TensorIOMode.INPUT:
+                    context.set_input_shape(name, shape)
+                
+                torch_dtype = numpy_to_torch_dtype_dict[dtype]
+                tensor = torch.empty(tuple(shape), dtype=torch_dtype, device=device)
+                tensors[binding] = tensor
+        nvtx.range_pop()
+
+    def infer(self, feed_dicts: List[Dict[str, torch.Tensor]], use_cuda_graph=False):
+        results = []
+        num_batches = len(feed_dicts)
+        
+        for i in range(0, num_batches, self.num_streams):
+            batch_results = []
+            
+            for j in range(self.num_streams):
+                if i + j >= num_batches:
+                    break
+                
+                feed_dict = feed_dicts[i + j]
+                stream = self.streams[j]
+                context = self.contexts[j]
+                tensors = self.stream_tensors[j]
+
+                for name, buf in feed_dict.items():
+                    tensors[name].copy_(buf)
+
+                for name, tensor in tensors.items():
+                    context.set_tensor_address(name, tensor.data_ptr())
+
+                success = context.execute_async_v3(stream.cuda_stream)
+                if not success:
+                    raise RuntimeError(f"Inference failed for batch {i + j}")
+
+                batch_results.append({name: tensor.clone() for name, tensor in tensors.items() 
+                                        if self.engine.get_tensor_mode(name) == trt.TensorIOMode.OUTPUT})
+
+            # Synchronize all used streams
+            for j in range(min(self.num_streams, num_batches - i)):
+                self.streams[j].synchronize()
+
+            results.extend(batch_results)
+
+        return results
