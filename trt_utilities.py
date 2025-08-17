@@ -16,7 +16,24 @@ import tensorrt as trt
 from logging import error, warning
 from tqdm import tqdm
 import copy
-from cuda import cudart
+
+# Support cuda-python <=12.x (cuda.cudart) and >=13.x (cuda.bindings.runtime)
+try:
+    # CUDA Python <= 12.x layout
+    from cuda import cudart as cudart  # type: ignore
+    _CUDART_SRC = "cuda.cudart"
+except Exception:  # pragma: no cover
+    # CUDA Python >= 13.x metapackage layout
+    from cuda.bindings import runtime as cudart  # type: ignore
+    _CUDART_SRC = "cuda.bindings.runtime"
+
+# Optional: tiny debug line; comment out if you don't want import-time logs
+try:
+    from importlib.metadata import version as _pkg_version
+    _cuda_py_ver = _pkg_version("cuda-python")
+except Exception:  # pragma: no cover
+    _cuda_py_ver = "unknown"
+# print(f"[ComfyUI-Rife-TensorRT] Using {_CUDART_SRC} (cuda-python={_cuda_py_ver})")
 
 TRT_LOGGER = trt.Logger(trt.Logger.ERROR)
 G_LOGGER.module_severity = G_LOGGER.ERROR
