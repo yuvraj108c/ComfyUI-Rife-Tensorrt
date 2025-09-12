@@ -1,5 +1,7 @@
-<div align="center">
 
+
+<div align="center">
+⚡ Updated to newest version⚡
 # ComfyUI Rife TensorRT ⚡
 
 [![python](https://img.shields.io/badge/python-3.10.12-green)](https://www.python.org/downloads/release/python-31012/)
