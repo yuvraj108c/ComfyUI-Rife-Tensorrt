@@ -87,7 +87,7 @@ def export_onnx(ckpt_name, ensemble, scale_factor):
     model_path = load_file_from_github_release(MODEL_TYPE, ckpt_name)
     arch_ver = CKPT_NAME_VER_DICT[ckpt_name]
     interpolation_model = IFNet(arch_ver=arch_ver)
-    interpolation_model.load_state_dict(torch.load(model_path))
+    interpolation_model.load_state_dict(torch.load(model_path, map_location=TORCH_DEVICE))
     interpolation_model.eval().to(TORCH_DEVICE)
 
     # # dummy data

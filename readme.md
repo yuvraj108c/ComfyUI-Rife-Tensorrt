@@ -2,21 +2,36 @@
 
 # ComfyUI Rife TensorRT ⚡
 
-[![python](https://img.shields.io/badge/python-3.10.12-green)](https://www.python.org/downloads/release/python-31012/)
-[![cuda](https://img.shields.io/badge/cuda-12.4-green)](https://developer.nvidia.com/cuda-downloads)
-[![trt](https://img.shields.io/badge/TRT-10.4.0-green)](https://developer.nvidia.com/tensorrt)
+[![python](https://img.shields.io/badge/python-3.12.3-green)](https://www.python.org/downloads/release/python-3123//)
+[![cuda](https://img.shields.io/badge/cuda-13.0-green)](https://developer.nvidia.com/cuda-downloads)
+[![trt](https://img.shields.io/badge/TRT-10.14.1.48-green)](https://developer.nvidia.com/tensorrt)
 [![by-nc-sa/4.0](https://img.shields.io/badge/license-CC--BY--NC--SA--4.0-lightgrey)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
 
-![node](https://github.com/user-attachments/assets/5fd6d529-300c-42a5-b9cf-46e031f0bcb5)
-
-
-</div>
 
 This project provides a [TensorRT](https://github.com/NVIDIA/TensorRT) implementation of [RIFE](https://github.com/hzwer/ECCV2022-RIFE) for ultra fast frame interpolation inside ComfyUI
 
-This project is licensed under [CC BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/4.0/), everyone is FREE to access, use, modify and redistribute with the same license.
+**Last tested**: 08 June 2026 (ComfyUI v0.23.0 | Torch 2.12.0 | Python 3.12.3 | L40S | CUDA 13.0 | Ubuntu 24.04)
 
-If you like the project, please give me a star! ⭐
+<img width="938" height="236" alt="Screenshot 2026-06-08 at 09 21 51" src="https://github.com/user-attachments/assets/8228bd5f-7683-4b66-a476-220d5f667808" />
+
+</div>
+
+## ⭐ Support
+If you like my projects and wish to see updates and new features, please consider supporting me. It helps a lot! 
+
+[![ComfyUI-Depth-Anything-Tensorrt](https://img.shields.io/badge/ComfyUI--Depth--Anything--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Depth-Anything-Tensorrt)
+[![ComfyUI-Upscaler-Tensorrt](https://img.shields.io/badge/ComfyUI--Upscaler--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt)
+[![ComfyUI-Dwpose-Tensorrt](https://img.shields.io/badge/ComfyUI--Dwpose--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Dwpose-Tensorrt)
+[![ComfyUI-Rife-Tensorrt](https://img.shields.io/badge/ComfyUI--Rife--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Rife-Tensorrt)
+
+[![ComfyUI-Whisper](https://img.shields.io/badge/ComfyUI--Whisper-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Whisper)
+[![ComfyUI_InvSR](https://img.shields.io/badge/ComfyUI__InvSR-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI_InvSR)
+[![ComfyUI-Thera](https://img.shields.io/badge/ComfyUI--Thera-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Thera)
+[![ComfyUI-Video-Depth-Anything](https://img.shields.io/badge/ComfyUI--Video--Depth--Anything-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Video-Depth-Anything)
+[![ComfyUI-PiperTTS](https://img.shields.io/badge/ComfyUI--PiperTTS-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-PiperTTS)
+
+[![buy-me-coffees](https://i.imgur.com/3MDbAtw.png)](https://www.buymeacoffee.com/yuvraj108cZ)
+[![paypal-donation](https://i.imgur.com/w5jjubk.png)](https://paypal.me/yuvraj108c)
 
 ---
 
@@ -40,26 +55,35 @@ cd ./ComfyUI-Rife-Tensorrt
 pip install -r requirements.txt
 ```
 
-## 🛠️ Building Tensorrt Engine
+## 🛠️ Supported Models
 
-1. Download one of the following onnx models:
-   - [rife49_ensemble_True_scale_1_sim.onnx](https://huggingface.co/yuvraj108c/rife-onnx/resolve/main/rife49_ensemble_True_scale_1_sim.onnx)
-   - [rife48_ensemble_True_scale_1_sim.onnx](https://huggingface.co/yuvraj108c/rife-onnx/resolve/main/rife48_ensemble_True_scale_1_sim.onnx)
-   - [rife47_ensemble_True_scale_1_sim.onnx](https://huggingface.co/yuvraj108c/rife-onnx/resolve/main/rife47_ensemble_True_scale_1_sim.onnx)
-2. Edit onnx/trt paths inside [export_trt.py](./export_trt.py) and build tensorrt engine by running:
-   - `python export_trt.py`
+The following RIFE models are supported and will be automatically downloaded and built:
+   - **rife49_ensemble_True_scale_1_sim** (default) - Latest and most accurate
+   - **rife48_ensemble_True_scale_1_sim** - Good balance of speed and quality
+   - **rife47_ensemble_True_scale_1_sim** - Fastest option
 
-3. Place the exported engine inside ComfyUI `/models/tensorrt/rife` directory
+Models are automatically downloaded from [HuggingFace](https://huggingface.co/yuvraj108c/rife-onnx) and TensorRT engines are built on first use.
 
 ## ☀️ Usage
 
-- Insert node by `Right Click -> tensorrt -> Rife Tensorrt`
-- Image resolutions between `256x256` and `3840x3840` will work with the tensorrt engines 
+1. **Load Model**: Insert `Right Click -> Add Node -> tensorrt -> Load Rife Tensorrt Model`
+   - Choose your preferred RIFE model (rife47, rife48, or rife49)
+   - Select precision (fp16 recommended for speed, fp32 for maximum accuracy)
+   - The model will be automatically downloaded and TensorRT engine built on first use
 
-## 🤖 Environment tested
+2. **Process Frames**: Insert `Right Click -> Add Node -> tensorrt -> Rife Tensorrt`
+   - Connect the loaded model from step 1
+   - Input your video frames
+   - Configure interpolation settings (multiplier, etc.)
+   - Image resolutions between `256x256` and `3840x3840` are supported 
 
-- Ubuntu 22.04 LTS, Cuda 12.4, Tensorrt 10.4.0, Python 3.10, RTX 3070 GPU
-- Windows (Not tested, but should work)
+
+## 🚨 Updates
+
+### 08 June 2026
+- **Automatic Model Management**: No more manual downloads! Models are automatically downloaded from HuggingFace and TensorRT engines are built on demand. [PR#14](https://github.com/yuvraj108c/ComfyUI-Rife-Tensorrt/pull/14) by [@reaperhammer](https://github.com/reaperhammer)
+- **Improved Workflow + Codebase**: New two-node system with `Load Rife Tensorrt Model` + `Rife Tensorrt` for better organization
+- **Remove cuda-python**: No more cuda installation issues on windows
 
 ## 👏 Credits
 

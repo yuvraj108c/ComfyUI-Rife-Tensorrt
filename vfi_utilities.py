@@ -7,7 +7,9 @@ import einops
 from comfy.model_management import soft_empty_cache, get_torch_device
 import numpy as np
 from comfy.utils import ProgressBar
-from colored import Fore, Back, Style  
+from colored import Fore, Back, Style
+from .utilities import rife_logger  
+from tqdm import tqdm
 
 DEVICE = get_torch_device()
 
@@ -24,9 +26,6 @@ def load_file_from_github_release(model_type, ckpt_name):
 
     error_str = '\n\n'.join(error_strs)
     raise Exception(f"Tried all GitHub base urls to download {ckpt_name} but no suceess. Below is the error log:\n\n{error_str}")
-
-def logger(msg):
-    print(f'{Style.reset}{Fore.cyan}⚡ [Rife Tensorrt] - {msg}{Style.reset}')
 
 def preprocess_frames(frames):
     return einops.rearrange(frames[..., :3], "n h w c -> n c h w")
@@ -45,7 +44,15 @@ def generate_frames_rife(
     out_len = 0
 
     number_of_frames_processed_since_last_cleared_cuda_cache = 0
-    pbar = ProgressBar(len(frames))
+    pbar = ProgressBar(len(frames)-1)
+
+    bar_format = "[\033[94mComfyUI-Rife-Tensorrt\033[0m|\033[92mINFO\033[0m] - \033[92m{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
+    progress_bar = tqdm(
+        total=len(frames)-1,
+        desc="Interpolating",
+        bar_format=bar_format,
+        disable=((len(frames)-1) == 1)
+    )
 
     for frame_itr in range(len(frames) - 1): # Skip the final frame since there are no frames after it
 
@@ -67,19 +74,25 @@ def generate_frames_rife(
             if number_of_frames_processed_since_last_cleared_cuda_cache >= clear_cache_after_n_frames:
                 soft_empty_cache()
                 number_of_frames_processed_since_last_cleared_cuda_cache = 0
-                logger("Clearing cache...")
+                rife_logger.info("Clearing cache...")
 
             pbar.update(1)
+            progress_bar.update(1)
             
-
+    progress_bar.refresh()
+    progress_bar.close()
+    
     # Append final frame
     output_frames[out_len] = frames[-1:]
-    logger(f"done! - {(len(frames) -1) * (multiplier-1)} new frames generated at resolution: {output_frames[0].shape}")
+    # Get actual frame shape from first interpolated frame (CHW format)
+    actual_frame = output_frames[0]
+    h, w = actual_frame.shape[1], actual_frame.shape[2]
+    rife_logger.info(f"done! - {out_len} total frames output at resolution: {h}x{w}")
     out_len += 1
 
     # clear cache for courtesy
     soft_empty_cache()
-    logger("Final clearing cache done ...")
+    rife_logger.info("Final clearing cache done ...")
 # 
     res = output_frames[:out_len]
     return res

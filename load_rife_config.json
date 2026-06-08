@@ -1,0 +1,16 @@
+{
+  "model": {
+    "options": [
+      "rife47_ensemble_True_scale_1_sim",
+      "rife48_ensemble_True_scale_1_sim",
+      "rife49_ensemble_True_scale_1_sim"
+    ],
+    "default": "rife49_ensemble_True_scale_1_sim",
+    "tooltip": "RIFE models for video frame interpolation. These models have been tested with tensorrt. Loaded from config."
+  },
+  "precision": {
+    "options": ["fp16", "fp32"],
+    "default": "fp16",
+    "tooltip": "Precision to build the tensorrt engines. Loaded from config."
+  }
+}
