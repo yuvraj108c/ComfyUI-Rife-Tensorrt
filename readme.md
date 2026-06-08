@@ -2,9 +2,9 @@
 
 # ComfyUI Rife TensorRT ⚡
 
-[![python](https://img.shields.io/badge/python-3.12.11-green)](https://www.python.org/downloads/release/python-31211/)
-[![cuda](https://img.shields.io/badge/cuda-12.9-green)](https://developer.nvidia.com/cuda-downloads)
-[![trt](https://img.shields.io/badge/TRT-10.13.3.9-green)](https://developer.nvidia.com/tensorrt)
+[![python](https://img.shields.io/badge/python-3.12.3-green)](https://www.python.org/downloads/release/python-3123//)
+[![cuda](https://img.shields.io/badge/cuda-13.0-green)](https://developer.nvidia.com/cuda-downloads)
+[![trt](https://img.shields.io/badge/TRT-10.14.1.48-green)](https://developer.nvidia.com/tensorrt)
 [![by-nc-sa/4.0](https://img.shields.io/badge/license-CC--BY--NC--SA--4.0-lightgrey)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
 
 ![node](https://github.com/user-attachments/assets/5fd6d529-300c-42a5-b9cf-46e031f0bcb5)
@@ -12,11 +12,22 @@
 
 </div>
 
-This project provides a [TensorRT](https://github.com/NVIDIA/TensorRT) implementation of [RIFE](https://github.com/hzwer/ECCV2022-RIFE) for ultra fast frame interpolation inside ComfyUI
+## ⭐ Support
+If you like my projects and wish to see updates and new features, please consider supporting me. It helps a lot! 
 
-This project is licensed under [CC BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/4.0/), everyone is FREE to access, use, modify and redistribute with the same license.
+[![ComfyUI-Depth-Anything-Tensorrt](https://img.shields.io/badge/ComfyUI--Depth--Anything--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Depth-Anything-Tensorrt)
+[![ComfyUI-Upscaler-Tensorrt](https://img.shields.io/badge/ComfyUI--Upscaler--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt)
+[![ComfyUI-Dwpose-Tensorrt](https://img.shields.io/badge/ComfyUI--Dwpose--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Dwpose-Tensorrt)
+[![ComfyUI-Rife-Tensorrt](https://img.shields.io/badge/ComfyUI--Rife--Tensorrt-blue?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Rife-Tensorrt)
 
-If you like the project, please give me a star! ⭐
+[![ComfyUI-Whisper](https://img.shields.io/badge/ComfyUI--Whisper-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Whisper)
+[![ComfyUI_InvSR](https://img.shields.io/badge/ComfyUI__InvSR-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI_InvSR)
+[![ComfyUI-Thera](https://img.shields.io/badge/ComfyUI--Thera-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Thera)
+[![ComfyUI-Video-Depth-Anything](https://img.shields.io/badge/ComfyUI--Video--Depth--Anything-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-Video-Depth-Anything)
+[![ComfyUI-PiperTTS](https://img.shields.io/badge/ComfyUI--PiperTTS-gray?style=flat-square)](https://github.com/yuvraj108c/ComfyUI-PiperTTS)
+
+[![buy-me-coffees](https://i.imgur.com/3MDbAtw.png)](https://www.buymeacoffee.com/yuvraj108cZ)
+[![paypal-donation](https://i.imgur.com/w5jjubk.png)](https://paypal.me/yuvraj108c)
 
 ---
 
@@ -59,7 +70,7 @@ Models are automatically downloaded from [HuggingFace](https://huggingface.co/yu
 2. **Process Frames**: Insert `Right Click -> Add Node -> tensorrt -> Rife Tensorrt`
    - Connect the loaded model from step 1
    - Input your video frames
-   - Configure interpolation settings (multiplier, CUDA graph, etc.)
+   - Configure interpolation settings (multiplier, etc.)
    - Image resolutions between `256x256` and `3840x3840` are supported 
 
 ## 🤖 Environment tested
@@ -69,10 +80,10 @@ Models are automatically downloaded from [HuggingFace](https://huggingface.co/yu
 
 ## 🚨 Updates
 
-### December 2025
-- **Automatic Model Management**: No more manual downloads! Models are automatically downloaded from HuggingFace and TensorRT engines are built on demand
-- **Improved Workflow**: New two-node system with `Load Rife Tensorrt Model` + `Rife Tensorrt` for better organization
-- **Updated Dependencies**: TensorRT updated to 10.13.3.9 for better performance and compatibility
+### 08 June 2026
+- **Automatic Model Management**: No more manual downloads! Models are automatically downloaded from HuggingFace and TensorRT engines are built on demand. [PR#14](https://github.com/yuvraj108c/ComfyUI-Rife-Tensorrt/pull/14) by [@reaperhammer](https://github.com/reaperhammer)
+- **Improved Workflow + Codebase**: New two-node system with `Load Rife Tensorrt Model` + `Rife Tensorrt` for better organization
+- **Remove cuda-python**: No more cuda installation issues on windows
 
 ## 👏 Credits
 

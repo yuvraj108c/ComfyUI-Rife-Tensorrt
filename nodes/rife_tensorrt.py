@@ -46,7 +46,7 @@ class RifeTensorrt:
 
         def return_middle_frame(frame_0, frame_1, timestep):
             timestep_t = torch.tensor([timestep], dtype=torch.float32).to(get_torch_device())
-            output = engine.infer({"img0": frame_0, "img1": frame_1, "timestep": timestep_t}, cudaStream, use_cuda_graph)
+            output = engine.infer({"img0": frame_0, "img1": frame_1, "timestep": timestep_t}, cudaStream)
             result = output['output']
             return result
 
