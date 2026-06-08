@@ -2,6 +2,8 @@ import requests
 from tqdm import tqdm
 import logging
 import sys
+import json
+import os
 
 class ColoredLogger:
     COLORS = {
@@ -74,6 +76,8 @@ class ColoredLogger:
     def critical(self, message):
         self.logger.critical(f"{self.COLORS['MAGENTA']}{message}{self.COLORS['RESET']}")
 
+rife_logger = ColoredLogger("ComfyUI-Rife-Tensorrt")
+
 def download_file(url, save_path):
     """
     Download a file from URL with progress bar
@@ -100,3 +104,38 @@ def download_file(url, save_path):
         for data in response.iter_content(chunk_size=1024):
             size = file.write(data)
             progress_bar.update(size)
+
+
+# Function to load configuration
+def load_node_config(config_filename="load_rife_config.json"):
+    """Loads node configuration from a JSON file."""
+    current_dir = os.path.dirname(__file__)
+    config_path = os.path.join(current_dir, config_filename)
+
+    default_config = {
+        "model": {
+            "options": ["rife49_ensemble_True_scale_1_sim"],
+            "default": "rife49_ensemble_True_scale_1_sim",
+            "tooltip": "Default model (fallback from code)"
+        },
+        "precision": {
+            "options": ["fp16", "fp32"],
+            "default": "fp16",
+            "tooltip": "Default precision (fallback from code)"
+        }
+    }
+
+    try:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        rife_logger.info(f"Successfully loaded configuration from {config_filename}")
+        return config
+    except FileNotFoundError:
+        rife_logger.warning(f"Configuration file '{config_path}' not found. Using default fallback configuration.")
+        return default_config
+    except json.JSONDecodeError:
+        rife_logger.error(f"Error decoding JSON from '{config_path}'. Using default fallback configuration.")
+        return default_config
+    except Exception as e:
+        rife_logger.error(f"An unexpected error occurred while loading '{config_path}': {e}. Using default fallback.")
+        return default_config
