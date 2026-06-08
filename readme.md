@@ -7,8 +7,7 @@
 [![trt](https://img.shields.io/badge/TRT-10.14.1.48-green)](https://developer.nvidia.com/tensorrt)
 [![by-nc-sa/4.0](https://img.shields.io/badge/license-CC--BY--NC--SA--4.0-lightgrey)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
 
-![node](https://github.com/user-attachments/assets/5fd6d529-300c-42a5-b9cf-46e031f0bcb5)
-
+<img width="938" height="236" alt="Screenshot 2026-06-08 at 09 21 51" src="https://github.com/user-attachments/assets/8228bd5f-7683-4b66-a476-220d5f667808" />
 
 </div>
 
