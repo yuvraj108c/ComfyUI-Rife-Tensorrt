@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-rife-tensorrt"
+description = "This project provides a TensorRT implementation of [a/RIFE](https://github.com/hzwer/ECCV2022-RIFE) for ultra fast frame interpolation inside ComfyUI"
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["einops", "colored", "polygraphy", "tensorrt==10.4.0", "cuda-python"]
+
+[project.urls]
+Repository = "https://github.com/yuvraj108c/ComfyUI-Rife-Tensorrt"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-Rife-Tensorrt"
+Icon = ""
