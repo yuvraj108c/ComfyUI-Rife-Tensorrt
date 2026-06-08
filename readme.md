@@ -7,6 +7,11 @@
 [![trt](https://img.shields.io/badge/TRT-10.14.1.48-green)](https://developer.nvidia.com/tensorrt)
 [![by-nc-sa/4.0](https://img.shields.io/badge/license-CC--BY--NC--SA--4.0-lightgrey)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
 
+
+This project provides a [TensorRT](https://github.com/NVIDIA/TensorRT) implementation of [RIFE](https://github.com/hzwer/ECCV2022-RIFE) for ultra fast frame interpolation inside ComfyUI
+
+**Last tested**: 08 June 2026 (ComfyUI v0.23.0 | Torch 2.12.0 | Python 3.12.3 | L40S | CUDA 13.0 | Ubuntu 24.04)
+
 <img width="938" height="236" alt="Screenshot 2026-06-08 at 09 21 51" src="https://github.com/user-attachments/assets/8228bd5f-7683-4b66-a476-220d5f667808" />
 
 </div>
@@ -72,10 +77,6 @@ Models are automatically downloaded from [HuggingFace](https://huggingface.co/yu
    - Configure interpolation settings (multiplier, etc.)
    - Image resolutions between `256x256` and `3840x3840` are supported 
 
-## 🤖 Environment tested
-
-- WSL Ubuntu 24.04.03 LTS, Cuda 12.9, Tensorrt 10.13.3.9, Python 3.12.11, RTX 5080 GPU
-- Windows (Not tested, but should work)
 
 ## 🚨 Updates
 
