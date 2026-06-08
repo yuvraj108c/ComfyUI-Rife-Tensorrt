@@ -53,4 +53,6 @@ class RifeTensorrt:
         result = generate_frames_rife(frames, clear_cache_after_n_frames, multiplier, return_middle_frame)
         out = postprocess_frames(result)
 
+        engine.reset()
+
         return (out,)

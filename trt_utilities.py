@@ -150,12 +150,13 @@ class Engine:
         del self.tensors
 
     def reset(self, engine_path=None):
-        del self.engine
+        # del self.engine
         del self.context
         del self.buffers
         del self.tensors
-        self.engine_path = engine_path
+        # self.engine_path = engine_path
 
+        self.context = None
         self.buffers = OrderedDict()
         self.tensors = OrderedDict()
         self.inputs = {}

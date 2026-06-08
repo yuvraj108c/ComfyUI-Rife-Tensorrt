@@ -87,5 +87,6 @@ class LoadRifeTensorrtModel:
         mm.soft_empty_cache()
         engine = Engine(tensorrt_model_path)
         engine.load()
+        engine.model_name = model
 
         return (engine,)

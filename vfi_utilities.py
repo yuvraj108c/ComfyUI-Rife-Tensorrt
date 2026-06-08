@@ -74,7 +74,7 @@ def generate_frames_rife(
             if number_of_frames_processed_since_last_cleared_cuda_cache >= clear_cache_after_n_frames:
                 soft_empty_cache()
                 number_of_frames_processed_since_last_cleared_cuda_cache = 0
-                rife_logger.info("Clearing cache...")
+                # rife_logger.info("Clearing cache...") # spamming console + conflict with tqdm progress
 
             pbar.update(1)
             progress_bar.update(1)
