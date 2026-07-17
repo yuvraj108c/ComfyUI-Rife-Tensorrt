@@ -58,7 +58,24 @@ class LoadRifeTensorrtModel:
         engine_min_w, engine_opt_w, engine_max_w = IMAGE_DIM_MIN, IMAGE_DIM_OPT, IMAGE_DIM_MAX
         tensorrt_model_path = os.path.join(tensorrt_models_dir, f"{model}_{precision}_{engine_min_batch}x{engine_channel}x{engine_min_h}x{engine_min_w}_{engine_opt_batch}x{engine_channel}x{engine_opt_h}x{engine_opt_w}_{engine_max_batch}x{engine_channel}x{engine_max_h}x{engine_max_w}_{tensorrt.__version__}.trt")
 
-        if not os.path.exists(tensorrt_model_path):
+        # Check if the engine file exists and try loading it. If loading fails (e.g. version mismatch), rebuild it.
+        engine_loaded = False
+        if os.path.exists(tensorrt_model_path):
+            rife_logger.info(f"Loading TensorRT engine: {tensorrt_model_path}")
+            mm.soft_empty_cache()
+            engine = Engine(tensorrt_model_path)
+            try:
+                engine.load()
+                engine_loaded = True
+            except Exception as e:
+                rife_logger.warning(f"Failed to load TensorRT engine (likely due to version mismatch or corruption): {e}")
+                rife_logger.warning("Attempting to rebuild engine...")
+                try:
+                    os.remove(tensorrt_model_path)
+                except Exception as rm_err:
+                    rife_logger.error(f"Failed to remove corrupted/outdated engine file: {rm_err}")
+
+        if not engine_loaded:
             if not os.path.exists(onnx_model_path):
                 onnx_model_download_url = f"https://huggingface.co/yuvraj108c/rife-onnx/resolve/main/{model}.onnx"
                 rife_logger.info(f"Downloading {onnx_model_download_url}")
@@ -82,11 +99,10 @@ class LoadRifeTensorrtModel:
             )
             e = time.time()
             rife_logger.info(f"Time taken to build: {(e-s)} seconds")
+            rife_logger.info(f"Loading TensorRT engine: {tensorrt_model_path}")
+            mm.soft_empty_cache()
+            engine = Engine(tensorrt_model_path)
+            engine.load()
 
-        rife_logger.info(f"Loading TensorRT engine: {tensorrt_model_path}")
-        mm.soft_empty_cache()
-        engine = Engine(tensorrt_model_path)
-        engine.load()
         engine.model_name = model
-
         return (engine,)
